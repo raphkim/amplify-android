@@ -26,7 +26,6 @@ import com.amplifyframework.core.async.Result;
  */
 public interface DataStoreCategoryBehavior {
     /**
-     *
      * @param object
      * @param callback
      * @param <T>
