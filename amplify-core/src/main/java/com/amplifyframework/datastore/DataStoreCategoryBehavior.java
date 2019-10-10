@@ -13,17 +13,24 @@
  * permissions and limitations under the License.
  */
 
-package com.amplifyframework.core.category;
+package com.amplifyframework.datastore;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import com.amplifyframework.core.async.Listener;
+import com.amplifyframework.core.async.Result;
 
 /**
- * Enum that declares the various categories
- * of APIs supported by Amplify System.
+ *
  */
-public enum CategoryType {
-    ANALYTICS,
-    API,
-    DATA,
-    HUB,
-    LOGGING,
-    STORAGE;
+public interface DataStoreCategoryBehavior {
+    /**
+     *
+     * @param object
+     * @param callback
+     * @param <T>
+     */
+    <T> void save(@NonNull final T object,
+                  @Nullable final Listener<Result> callback);
 }

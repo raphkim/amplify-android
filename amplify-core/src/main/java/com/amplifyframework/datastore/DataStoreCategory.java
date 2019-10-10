@@ -15,15 +15,26 @@
 
 package com.amplifyframework.datastore;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.amplifyframework.core.async.Listener;
 import com.amplifyframework.core.async.Result;
+import com.amplifyframework.core.category.Category;
+import com.amplifyframework.core.category.CategoryType;
 
-public interface DataStore<T> {
-    void save(T object, Listener<Result> callback);
+public final class DataStoreCategory extends Category<DataStorePlugin> implements DataStoreCategoryBehavior {
+    @Override
+    public CategoryType getCategoryType() {
+        return CategoryType.DATA;
+    }
 
-    void delete(T object, Listener<Result> callback);
-
-    void query(Class<T> objects, Listener<Result> callback);
-
-    void observe(T object, Listener<Result> callback);
+    /**
+     * @param object
+     * @param callback
+     */
+    @Override
+    public <T> void save(@NonNull T object, @Nullable Listener<Result> callback) {
+        getSelectedPlugin().save(object, callback);
+    }
 }

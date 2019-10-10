@@ -13,17 +13,9 @@
  * permissions and limitations under the License.
  */
 
-package com.amplifyframework.core.category;
+package com.amplifyframework.datastore;
 
-/**
- * Enum that declares the various categories
- * of APIs supported by Amplify System.
- */
-public enum CategoryType {
-    ANALYTICS,
-    API,
-    DATA,
-    HUB,
-    LOGGING,
-    STORAGE;
+import com.amplifyframework.core.plugin.Plugin;
+
+public interface DataStorePlugin extends Plugin<Void>, DataStoreCategoryBehavior {
 }
