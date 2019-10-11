@@ -13,4 +13,25 @@
  * permissions and limitations under the License.
  */
 
-include ':amplify-core', ':aws-amplify-analytics-pinpoint', ':aws-amplify-storage-s3', ':amplify-datastore'
+package com.amplifyframework.datastore;
+
+public final class Person implements DataStoreObjectModel {
+    @DataStoreField
+    private final String firstName;
+
+    @DataStoreField
+    private final String lastName;
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public Person(String firstName, String lastName) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+    }
+}

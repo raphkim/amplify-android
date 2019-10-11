@@ -34,7 +34,7 @@ public final class DataStoreCategory extends Category<DataStorePlugin> implement
      * @param callback
      */
     @Override
-    public <T> void save(@NonNull T object, @Nullable Listener<Result> callback) {
+    public <T extends DataStoreObjectModel> void save(@NonNull T object, @Nullable Listener<Result> callback) {
         getSelectedPlugin().save(object, callback);
     }
 }

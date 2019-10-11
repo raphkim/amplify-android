@@ -16,20 +16,29 @@
 package com.amplifyframework.datastore;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import com.amplifyframework.core.async.Listener;
-import com.amplifyframework.core.async.Result;
 
 /**
  *
  */
-public interface DataStoreCategoryBehavior {
-    /**
-     * @param object
-     * @param callback
-     * @param <T>
-     */
-    <T extends DataStoreObjectModel> void save(@NonNull final T object,
-                                               @NonNull final Listener<Result> callback);
+public final class TableColumn {
+
+    // This is the table column name.
+    private final String columnName;
+
+    // This is the table column value.
+    private final String columnValue;
+
+    public TableColumn(@NonNull final String columnName,
+                       @NonNull final String columnValue) {
+        this.columnName = columnName;
+        this.columnValue = columnValue;
+    }
+
+    public String getColumnName() {
+        return columnName;
+    }
+
+    public String getColumnValue() {
+        return columnValue;
+    }
 }

@@ -13,4 +13,15 @@
  * permissions and limitations under the License.
  */
 
-include ':amplify-core', ':aws-amplify-analytics-pinpoint', ':aws-amplify-storage-s3', ':amplify-datastore'
+package com.amplifyframework.datastore;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.FIELD)
+public @interface DataStoreField {
+
+}

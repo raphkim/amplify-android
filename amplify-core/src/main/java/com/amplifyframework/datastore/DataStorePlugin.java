@@ -17,5 +17,9 @@ package com.amplifyframework.datastore;
 
 import com.amplifyframework.core.plugin.Plugin;
 
+/**
+ *
+ */
 public interface DataStorePlugin extends Plugin<Void>, DataStoreCategoryBehavior {
+
 }
