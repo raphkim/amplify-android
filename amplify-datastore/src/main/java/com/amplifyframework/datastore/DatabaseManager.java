@@ -50,7 +50,11 @@ public class DatabaseManager {
     private List<String> createTableSqlList = null;
 
     // Create database manager instance.
-    public DatabaseManager(Context ctx, String dbName, int dbVersion, List<String> tableNameList, List<String> createTableSqlList) {
+    public DatabaseManager(Context ctx,
+                           String dbName,
+                           int dbVersion,
+                           List<String> tableNameList,
+                           List<String> createTableSqlList) {
         this.ctx = ctx;
         this.dbName = dbName;
         this.dbVersion = dbVersion;
@@ -61,13 +65,18 @@ public class DatabaseManager {
     // Open database connection.
     public DatabaseManager openDB() {
         // Create database helper instance.
-        dbHelper = new SQLiteDatabaseHelper(ctx, this.dbName, null, this.dbVersion, this.tableNameList, this.createTableSqlList);
+        dbHelper = new SQLiteDatabaseHelper(ctx,
+                this.dbName,
+                null,
+                this.dbVersion,
+                this.tableNameList,
+                this.createTableSqlList);
 
-        // Get sqlite database connection. If not exist then create onw else return a database object.
+        // Get sqlite database connection. If not exist then
+        // create one else return a database object.
         this.database = dbHelper.getWritableDatabase();
         return this;
     }
-
 
     // close database connection.
     public void closeDB() {
@@ -150,9 +159,8 @@ public class DatabaseManager {
     /* Delete rows in table.
      *  tableName : Delete data table name.
      *  whereClause : Deleted rows meet condition. */
-    public void delete(String tableName, String whereClause)
-    {
-        if(!TextUtils.isEmpty(tableName)) {
+    public void delete(String tableName, String whereClause) {
+        if (!TextUtils.isEmpty(tableName)) {
             this.database.delete(tableName, whereClause, null);
         }
     }
@@ -167,8 +175,14 @@ public class DatabaseManager {
         List<Map<String, String>> ret = new ArrayList<Map<String, String>>();
 
         // Query all rows in table.
-        Cursor cursor = this.database.query(tableName, null, null, null, null, null, null);
-        if(cursor!=null)
+        Cursor cursor = this.database.query(tableName,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null);
+        if (cursor != null)
         {
             // Get all column name in an array.
             String[] columnNamesArr = cursor.getColumnNames();
@@ -181,8 +195,7 @@ public class DatabaseManager {
 
                 // Get column count.
                 int columnCount = columnNamesArr.length;
-                for(int i=0;i<columnCount;i++)
-                {
+                for (int i = 0; i < columnCount; i++) {
                     // Get each column name.
                     String columnName = columnNamesArr[i];
 
@@ -195,20 +208,15 @@ public class DatabaseManager {
                     // Get current column data type.
                     int columnType = cursor.getType(columnIndex);
 
-                    if(Cursor.FIELD_TYPE_STRING == columnType)
-                    {
+                    if (Cursor.FIELD_TYPE_STRING == columnType) {
                         columnValue = cursor.getString(columnIndex);
-                    }else if(Cursor.FIELD_TYPE_INTEGER == columnType)
-                    {
+                    } else if(Cursor.FIELD_TYPE_INTEGER == columnType) {
                         columnValue = String.valueOf(cursor.getInt(columnIndex));
-                    }else if(Cursor.FIELD_TYPE_FLOAT == columnType)
-                    {
+                    } else if(Cursor.FIELD_TYPE_FLOAT == columnType) {
                         columnValue = String.valueOf(cursor.getFloat(columnIndex));
-                    }else if(Cursor.FIELD_TYPE_BLOB == columnType)
-                    {
+                    } else if(Cursor.FIELD_TYPE_BLOB == columnType) {
                         columnValue = String.valueOf(cursor.getBlob(columnIndex));
-                    }else if(Cursor.FIELD_TYPE_NULL == columnType)
-                    {
+                    } else if(Cursor.FIELD_TYPE_NULL == columnType) {
                         columnValue = "null";
                     }
 
@@ -216,7 +224,7 @@ public class DatabaseManager {
 
                     ret.add(rowMap);
                 }
-            }while(cursor.moveToNext());
+            } while(cursor.moveToNext());
 
             cursor.close();
         }
@@ -228,15 +236,27 @@ public class DatabaseManager {
      *  tableName : The table name.
      *  Return a Cursor object.
      * */
-    public Cursor queryAllReturnCursor(String tableName)
-    {
+    public Cursor queryAllReturnCursor(String tableName) {
         // Query all rows in table.
-        Cursor cursor = this.database.query(tableName, null, null, null, null, null, null);
-        if(cursor!=null)
-        {
+        Cursor cursor = this.database.query(tableName,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null);
+        if (cursor != null) {
             // Move to first cursor.
             cursor.moveToFirst();
         }
         return cursor;
+    }
+
+    public SQLiteDatabaseHelper getDbHelper() {
+        return dbHelper;
+    }
+
+    public SQLiteDatabase getDatabase() {
+        return database;
     }
 }

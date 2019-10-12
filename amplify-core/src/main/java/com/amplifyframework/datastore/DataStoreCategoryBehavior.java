@@ -26,10 +26,17 @@ import com.amplifyframework.core.async.Result;
  */
 public interface DataStoreCategoryBehavior {
     /**
+     *
+     * @param object
+     * @param <T>
+     */
+    <T extends DataStoreObjectModel> void save(@NonNull final T object);
+
+    /**
      * @param object
      * @param callback
      * @param <T>
      */
     <T extends DataStoreObjectModel> void save(@NonNull final T object,
-                                               @NonNull final Listener<Result> callback);
+                                               @Nullable final Listener<Result> callback);
 }

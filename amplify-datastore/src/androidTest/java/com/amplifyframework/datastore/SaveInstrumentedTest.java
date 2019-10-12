@@ -17,6 +17,7 @@ package com.amplifyframework.datastore;
 
 import androidx.test.core.app.ApplicationProvider;
 
+import com.amplifyframework.core.Amplify;
 import com.amplifyframework.core.async.Listener;
 import com.amplifyframework.core.async.Result;
 
@@ -41,6 +42,8 @@ public final class SaveInstrumentedTest {
     @BeforeClass
     public static void setUpBeforeClass() {
         amplifyDataStorePlugin = new AmplifyDataStorePlugin(ApplicationProvider.getApplicationContext());
+        Amplify.addPlugin(amplifyDataStorePlugin);
+        Amplify.configure(ApplicationProvider.getApplicationContext());
     }
 
     @AfterClass
@@ -66,6 +69,6 @@ public final class SaveInstrumentedTest {
         });
 
         assertTrue("Expecting the disk write to succeed",
-                waitUntilDiskWriteIsComplete.await(100, TimeUnit.MILLISECONDS));
+                waitUntilDiskWriteIsComplete.await(100, TimeUnit.MINUTES));
     }
 }

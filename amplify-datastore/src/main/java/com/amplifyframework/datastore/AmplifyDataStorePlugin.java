@@ -17,6 +17,8 @@ package com.amplifyframework.datastore;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteStatement;
 
 import androidx.annotation.NonNull;
 
@@ -45,11 +47,23 @@ public class AmplifyDataStorePlugin implements DataStorePlugin {
     private final static int DATABASE_VERSION = 1;
 
     private final Map<String, Class<?>> classNameToClassObject;
+    private final Map<String, SQLiteStatement> insertPreparedStatements;
     private final DatabaseManager databaseManager;
     private final Executor diskIOExecutor;
 
+    /**
+     * Read all the class names, get the clazz objects for all classes
+     * Create tables for all classes
+     * Prepare and compile Insert prepared statements
+     * TODO: Detect changed models and call drop tables and create them again.
+     * TODO: Object relationships, do it in order
+     *
+     * @param context Android application context
+     */
     public AmplifyDataStorePlugin(@NonNull final Context context) {
         this.classNameToClassObject = new ConcurrentHashMap<String, Class<?>>();
+        this.insertPreparedStatements = new ConcurrentHashMap<String, SQLiteStatement>();
+        this.diskIOExecutor = Executors.newSingleThreadExecutor();
         populateAllClassNames();
         this.databaseManager = new DatabaseManager(context,
                 DATABASE_NAME,
@@ -57,7 +71,7 @@ public class AmplifyDataStorePlugin implements DataStorePlugin {
                 getTableNameList(),
                 getCreateTableSqlList());
         this.databaseManager.openDB();
-        this.diskIOExecutor = Executors.newSingleThreadExecutor();
+        preComputeAllInsertPreparedStatements();
     }
 
     void tearDown() {
@@ -102,7 +116,15 @@ public class AmplifyDataStorePlugin implements DataStorePlugin {
      */
     @Override
     public CategoryType getCategoryType() {
-        return null;
+        return CategoryType.DATA;
+    }
+
+    /**
+     * @param object
+     */
+    @Override
+    public <T extends DataStoreObjectModel> void save(@NonNull T object) {
+
     }
 
     /**
@@ -127,22 +149,23 @@ public class AmplifyDataStorePlugin implements DataStorePlugin {
             return;
         }
 
-        diskIOExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    // Lookup table name based on the class name
-                    final String tableName = getTableNameForClass(className);
+        diskIOExecutor.execute(() -> {
+            try {
+                // Insert data into the table
+                // databaseManager.insert(tableName, getContentValuesFromClass(object, clazz));
+                final SQLiteStatement sqLiteStatement = insertPreparedStatements.get(className);
+                sqLiteStatement.clearBindings();
+                bindPreparedInsertSQLStatementWithValues(object,
+                        getTableNameForClass(className),
+                        sqLiteStatement);
+                sqLiteStatement.executeInsert();
+                sqLiteStatement.clearBindings();
 
-                    // Insert data into the table
-                    databaseManager.insert(tableName, getContentValuesFromClass(object, clazz));
-
-                    // Report success in the listener onResult
-                    listener.onResult(new SaveResult());
-                } catch (Exception ex) {
-                    // Report any error in the listener onError
-                    listener.onError(new AmplifyRuntimeException("Error in saving object. " + ex));
-                }
+                // Report success in the listener onResult
+                listener.onResult(new SaveResult());
+            } catch (Exception ex) {
+                // Report any error in the listener onError
+                listener.onError(new AmplifyRuntimeException("Error in saving object. " + ex));
             }
         });
     }
@@ -245,5 +268,72 @@ public class AmplifyDataStorePlugin implements DataStorePlugin {
             }
         }
         return contentValues;
+    }
+
+    private SQLiteStatement getPreparedInsertSQLStatement(@NonNull final Class<?> clazz,
+                                                          @NonNull final String tableName) {
+        final StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("INSERT INTO ");
+        stringBuilder.append(tableName);
+        stringBuilder.append(" (");
+        final Set<Field> classFields = findFields(clazz, DataStoreField.class);
+        Iterator<Field> fields = classFields.iterator();
+        while (fields.hasNext()) {
+            Field field = fields.next();
+            stringBuilder.append(field.getName());
+            if (fields.hasNext()) {
+                stringBuilder.append(", ");
+            } else {
+                stringBuilder.append(")");
+            }
+        }
+        stringBuilder.append(" VALUES ");
+        stringBuilder.append("(");
+        for (int i = 0; i < classFields.size(); i++) {
+            if (i == classFields.size() - 1) {
+                stringBuilder.append("?");
+            } else {
+                stringBuilder.append("?, ");
+            }
+        }
+        stringBuilder.append(")");
+        final String sql = stringBuilder.toString();
+        return this.databaseManager.getDatabase().compileStatement(sql);
+    }
+
+    private void bindPreparedInsertSQLStatementWithValues(@NonNull final Object object,
+                                                          @NonNull final String tableName,
+                                                          @NonNull final SQLiteStatement sqLiteStatement)
+            throws IllegalAccessException {
+        final Cursor cursor = this.databaseManager.queryAllReturnCursor(tableName);
+        final Class<?> clazz = object.getClass();
+        final Set<Field> classFields = findFields(clazz, DataStoreField.class);
+        Iterator<Field> fields = classFields.iterator();
+        while (fields.hasNext()) {
+            final Field field = fields.next();
+            field.setAccessible(true);
+            final String fieldName = field.getName();
+            final int columnIndex = cursor.getColumnIndexOrThrow(fieldName) + 1;
+            if (field.getType().equals(float.class) || field.getType().equals(Float.class)) {
+                sqLiteStatement.bindDouble(columnIndex, (Float) field.get(object));
+            } else if (field.getType().equals(int.class) || field.getType().equals(Integer.class)) {
+                sqLiteStatement.bindDouble(columnIndex, (Integer) field.get(object));
+            } else if (field.getType().equals(long.class) || field.getType().equals(Long.class)) {
+                sqLiteStatement.bindDouble(columnIndex, (Long) field.get(object));
+            } else if (field.getType().equals(double.class) || field.getType().equals(Double.class)) {
+                sqLiteStatement.bindDouble(columnIndex, (Double) field.get(object));
+            } else if (field.getType().equals(String.class)) {
+                sqLiteStatement.bindString(columnIndex, (String) field.get(object));
+            }
+        }
+    }
+
+    private void preComputeAllInsertPreparedStatements() {
+        for (Map.Entry<String, Class<?>> classEntry: classNameToClassObject.entrySet()) {
+            final String className = classEntry.getKey();
+            final Class<?> clazz = classEntry.getValue();
+            insertPreparedStatements.put(className, getPreparedInsertSQLStatement(clazz,
+                    getTableNameForClass(classEntry.getKey())));
+        }
     }
 }

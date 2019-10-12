@@ -31,6 +31,14 @@ public final class DataStoreCategory extends Category<DataStorePlugin> implement
 
     /**
      * @param object
+     */
+    @Override
+    public <T extends DataStoreObjectModel> void save(@NonNull T object) {
+
+    }
+
+    /**
+     * @param object
      * @param callback
      */
     @Override

@@ -22,6 +22,8 @@ import com.amplifyframework.analytics.AnalyticsCategoryConfiguration;
 import com.amplifyframework.api.ApiCategoryConfiguration;
 import com.amplifyframework.core.category.CategoryConfiguration;
 import com.amplifyframework.core.category.CategoryType;
+import com.amplifyframework.datastore.DataStoreCategory;
+import com.amplifyframework.datastore.DataStoreCategoryConfiguration;
 import com.amplifyframework.hub.HubCategoryConfiguration;
 import com.amplifyframework.logging.LoggingCategoryConfiguration;
 import com.amplifyframework.storage.StorageCategoryConfiguration;
@@ -42,6 +44,7 @@ final class AmplifyConfiguration {
 
     private final AnalyticsCategoryConfiguration analytics;
     private final ApiCategoryConfiguration api;
+    private final DataStoreCategoryConfiguration data;
     private final HubCategoryConfiguration hub;
     private final LoggingCategoryConfiguration logging;
     private final StorageCategoryConfiguration storage;
@@ -54,6 +57,7 @@ final class AmplifyConfiguration {
     AmplifyConfiguration(Context context) {
         this.analytics = new AnalyticsCategoryConfiguration();
         this.api = new ApiCategoryConfiguration();
+        this.data = new DataStoreCategoryConfiguration();
         this.hub = new HubCategoryConfiguration();
         this.logging = new LoggingCategoryConfiguration();
         this.storage = new StorageCategoryConfiguration();
@@ -98,19 +102,20 @@ final class AmplifyConfiguration {
      */
     public CategoryConfiguration forCategoryType(final CategoryType categoryType) {
         switch (categoryType) {
-            case LOGGING:
-                return logging;
-            case HUB:
-                return hub;
-            case API:
-                return api;
             case ANALYTICS:
                 return analytics;
+            case API:
+                return api;
+            case DATA:
+                return data;
+            case HUB:
+                return hub;
             case STORAGE:
                 return storage;
+            case LOGGING:
+                return logging;
             default:
-                throw new ConfigurationException("Uknown/bad category type: " + categoryType);
+                throw new ConfigurationException("Unknown/bad category type: " + categoryType);
         }
     }
 }
-

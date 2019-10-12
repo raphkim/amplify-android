@@ -26,6 +26,8 @@ import com.amplifyframework.api.ApiPlugin;
 import com.amplifyframework.core.category.CategoryType;
 import com.amplifyframework.core.plugin.Plugin;
 import com.amplifyframework.core.plugin.PluginException;
+import com.amplifyframework.datastore.DataStoreCategory;
+import com.amplifyframework.datastore.DataStorePlugin;
 import com.amplifyframework.hub.HubCategory;
 import com.amplifyframework.hub.HubPlugin;
 import com.amplifyframework.logging.LoggingCategory;
@@ -54,6 +56,7 @@ public final class Amplify {
 
     @SuppressWarnings("all") public static final AnalyticsCategory Analytics;
     @SuppressWarnings("all") public static final ApiCategory API;
+    @SuppressWarnings("all") public static final DataStoreCategory DataStore;
     @SuppressWarnings("all") public static final LoggingCategory Logging;
     @SuppressWarnings("all") public static final StorageCategory Storage;
     @SuppressWarnings("all") public static final HubCategory Hub;
@@ -66,6 +69,7 @@ public final class Amplify {
     static {
         Analytics = new AnalyticsCategory();
         API = new ApiCategory();
+        DataStore = new DataStoreCategory();
         Logging = new LoggingCategory();
         Storage = new StorageCategory();
         Hub = new HubCategory();
@@ -113,6 +117,10 @@ public final class Amplify {
                 API.configure(amplifyConfiguration.forCategoryType(CategoryType.API));
             }
 
+            if (DataStore.getPlugins().size() > 0) {
+                DataStore.configure(amplifyConfiguration.forCategoryType(CategoryType.DATA));
+            }
+
             if (Hub.getPlugins().size() > 0) {
                 Hub.configure(amplifyConfiguration.forCategoryType(CategoryType.HUB));
             }
@@ -154,6 +162,13 @@ public final class Amplify {
                 case ANALYTICS:
                     if (plugin instanceof AnalyticsPlugin) {
                         Analytics.addPlugin((AnalyticsPlugin) plugin);
+                    } else {
+                        throw new PluginException.MismatchedPluginException();
+                    }
+                    break;
+                case DATA:
+                    if (plugin instanceof DataStorePlugin) {
+                        DataStore.addPlugin((DataStorePlugin) plugin);
                     } else {
                         throw new PluginException.MismatchedPluginException();
                     }
@@ -205,6 +220,13 @@ public final class Amplify {
                 case ANALYTICS:
                     if (plugin instanceof AnalyticsPlugin) {
                         Analytics.removePlugin((AnalyticsPlugin) plugin);
+                    } else {
+                        throw new PluginException.MismatchedPluginException();
+                    }
+                    break;
+                case DATA:
+                    if (plugin instanceof DataStorePlugin) {
+                        DataStore.removePlugin((DataStorePlugin) plugin);
                     } else {
                         throw new PluginException.MismatchedPluginException();
                     }
