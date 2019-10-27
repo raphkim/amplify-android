@@ -15,11 +15,14 @@
 
 package com.amplifyframework.core.category;
 
+import android.content.Context;
 import androidx.annotation.NonNull;
 
 import com.amplifyframework.ConfigurationException;
 import com.amplifyframework.core.plugin.Plugin;
 import com.amplifyframework.core.plugin.PluginException;
+
+import org.json.JSONObject;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -37,7 +40,7 @@ public abstract class Category<P extends Plugin<?>> implements CategoryTypeable 
     /**
      * Map of the { pluginKey => plugin } object.
      */
-    private Map<String, P> plugins;
+    private final Map<String, P> plugins;
 
     /**
      * Flag to remember that the category is already configured by Amplify
@@ -49,30 +52,33 @@ public abstract class Category<P extends Plugin<?>> implements CategoryTypeable 
      * Constructs a new, not-yet-configured, Category.
      */
     public Category() {
-        this.plugins = new ConcurrentHashMap<String, P>();
+        this.plugins = new ConcurrentHashMap<>();
         this.isConfigured = false;
     }
 
     /**
      * Configure category with provided AmplifyConfiguration object.
      * @param configuration Configuration for all plugins in the category
-     * @throws ConfigurationException
-     *         The category has already been configured
+     * @param context An Android Context
+     * @throws ConfigurationException thrown when already configured
+     * @throws PluginException thrown when there is no configuration found for a plugin
      */
-    public final void configure(CategoryConfiguration configuration) throws ConfigurationException {
+    public final void configure(CategoryConfiguration configuration, Context context)
+            throws ConfigurationException, PluginException {
         if (isConfigured) {
             throw new ConfigurationException.AmplifyAlreadyConfiguredException();
         }
 
         for (P plugin : getPlugins()) {
             String pluginKey = plugin.getPluginKey();
-            Object pluginConfig = configuration.getPluginConfig(pluginKey);
+            JSONObject pluginConfig = configuration.getPluginConfig(pluginKey);
 
             if (pluginConfig != null) {
-                plugin.configure(pluginConfig);
+                plugin.configure(pluginConfig, context);
             } else {
-                // TODO
-                // The plugin does not have any configuration.
+                throw new PluginException("No configuration data was provided for " + pluginKey +
+                        ". Check the amplifyconfiguration.json file or, if you are configuring manually, " +
+                        "the config object you provided for the " + plugin.getCategoryType() + " category");
             }
         }
 
@@ -126,7 +132,7 @@ public abstract class Category<P extends Plugin<?>> implements CategoryTypeable 
      * @return The set of plugins associated to the Category
      */
     public final Set<P> getPlugins() {
-        return new HashSet<P>(plugins.values());
+        return new HashSet<>(plugins.values());
     }
 
     /**

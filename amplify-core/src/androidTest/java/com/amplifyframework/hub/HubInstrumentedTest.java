@@ -15,11 +15,14 @@
 
 package com.amplifyframework.hub;
 
+import android.content.Context;
 import android.util.Log;
 import androidx.test.core.app.ApplicationProvider;
 
 import com.amplifyframework.core.Amplify;
+import com.amplifyframework.core.AmplifyConfiguration;
 
+import com.amazonaws.amplify.core.test.R;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -49,8 +52,11 @@ public final class HubInstrumentedTest {
      */
     @BeforeClass
     public static void setUpBeforeClass() {
+        Context context = ApplicationProvider.getApplicationContext();
+        AmplifyConfiguration configuration = new AmplifyConfiguration();
+        configuration.populateFromConfigFile(context, R.raw.amplifyconfiguration);
         Amplify.addPlugin(new BackgroundExecutorHubPlugin());
-        Amplify.configure(ApplicationProvider.getApplicationContext());
+        Amplify.configure(configuration, context);
     }
 
     /**
@@ -62,11 +68,9 @@ public final class HubInstrumentedTest {
     @Test
     public void subscriptionTokenCanBeUsedToUnsubscribe() throws InterruptedException {
         final CountDownLatch waitUntilSubscriptionIsReceived = new CountDownLatch(1);
-        final SubscriptionToken token = Amplify.Hub.subscribe(HubChannel.STORAGE, payload -> {
-            waitUntilSubscriptionIsReceived.countDown();
-        });
+        final SubscriptionToken token = Amplify.Hub.subscribe(HubChannel.STORAGE,
+            payload -> waitUntilSubscriptionIsReceived.countDown());
         assertNotNull(token);
-        assertNotNull(token.getUuid());
 
         Amplify.Hub.unsubscribe(token);
 
@@ -138,7 +142,7 @@ public final class HubInstrumentedTest {
     public void multiplePublications() throws InterruptedException {
         final int numPublications = 10;
         final CountDownLatch allSubscriptionsReceived = new CountDownLatch(numPublications);
-        final List<Integer> subscriptionsReceived = new ArrayList<Integer>();
+        final List<Integer> subscriptionsReceived = new ArrayList<>();
 
         final SubscriptionToken token = Amplify.Hub.subscribe(HubChannel.STORAGE, payload -> {
             if (payload.getEventData() instanceof Integer) {
@@ -178,8 +182,8 @@ public final class HubInstrumentedTest {
         final int numPublications = 10;
         final int numDataTypes = 2;
         final CountDownLatch allSubscriptionsReceived = new CountDownLatch(numPublications);
-        final List<Integer> integerSubscriptionsReceived = new ArrayList<Integer>();
-        final List<String> stringSubscriptionsReceived = new ArrayList<String>();
+        final List<Integer> integerSubscriptionsReceived = new ArrayList<>();
+        final List<String> stringSubscriptionsReceived = new ArrayList<>();
         final String stringSubscriptionValue = "weatherAlwaysRemainsTheSame";
 
         final SubscriptionToken token = Amplify.Hub.subscribe(HubChannel.STORAGE, payload -> {

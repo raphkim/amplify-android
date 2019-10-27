@@ -28,11 +28,11 @@ public interface HubCategoryBehavior {
     /**
      * Publish a payload on the specified channel.
      * @param hubChannel The channel to send the message on
-     * @param hubpayload The payload to send
+     * @param hubPayload The payload to send
      * @throws HubException if the publication fails
      */
-    void publish(@NonNull final HubChannel hubChannel,
-                 @NonNull final HubPayload hubpayload) throws HubException;
+    void publish(@NonNull HubChannel hubChannel,
+                 @NonNull HubPayload hubPayload) throws HubException;
 
     /**
      * Subscribe to Hub payloads that arrive on a particular channel.
@@ -44,8 +44,8 @@ public interface HubCategoryBehavior {
      *          to de-register the listener.
      * @throws HubException if the subscription fails
      */
-    SubscriptionToken subscribe(@NonNull final HubChannel hubChannel,
-                                @Nullable final HubListener listener) throws HubException;
+    SubscriptionToken subscribe(@NonNull HubChannel hubChannel,
+                                @NonNull HubListener listener) throws HubException;
 
     /**
      * Subscribe to Hub payloads on a particular channel, and considering the result of applying
@@ -61,12 +61,12 @@ public interface HubCategoryBehavior {
      *          to de-register the listener.
      * @throws HubException if the subscription fails
      */
-    SubscriptionToken subscribe(@NonNull final HubChannel hubChannel,
-                                @Nullable final HubPayloadFilter hubPayloadFilter,
-                                @Nullable final HubListener listener) throws HubException;
+    SubscriptionToken subscribe(@NonNull HubChannel hubChannel,
+                                @Nullable HubPayloadFilter hubPayloadFilter,
+                                @NonNull HubListener listener) throws HubException;
 
     /**
-     * Unsubsribe a registered listener from the Hub system by passing the
+     * Unsubscribe a registered listener from the Hub system by passing the
      * token received from {@link #subscribe(HubChannel, HubListener)} or
      * {@link #subscribe(HubChannel, HubPayloadFilter, HubListener)}.
      * @param subscriptionToken the token which serves as an identifier for the listener
@@ -74,5 +74,6 @@ public interface HubCategoryBehavior {
      * @throws HubException on failure to unsubscribe, perhaps if the token is
      *                      invalid or does not refer to a known subscription
      */
-    void unsubscribe(@NonNull final SubscriptionToken subscriptionToken) throws HubException;
+    void unsubscribe(@NonNull SubscriptionToken subscriptionToken) throws HubException;
 }
+

@@ -26,6 +26,8 @@ import com.amplifyframework.analytics.AnalyticsPlugin;
 import com.amplifyframework.analytics.AnalyticsProfile;
 import com.amplifyframework.core.plugin.PluginException;
 
+import org.json.JSONObject;
+
 /**
  * The plugin implementation for Amazon Pinpoint in Analytics category.
  */
@@ -33,14 +35,11 @@ public final class AmazonPinpointAnalyticsPlugin extends AnalyticsPlugin<Object>
 
     private static final String TAG = AmazonPinpointAnalyticsPlugin.class.getSimpleName();
 
-    private final Context context;
-
     /**
      * Constructs a new AmazonPinpointAnalyticsPlugin.
      * @param context An Android Context
      */
     public AmazonPinpointAnalyticsPlugin(@NonNull Context context) {
-        this.context = context;
         Log.d(TAG, "Amazon Pinpoint Analytics Plugin is initialized.");
     }
 
@@ -78,7 +77,7 @@ public final class AmazonPinpointAnalyticsPlugin extends AnalyticsPlugin<Object>
     }
 
     @Override
-    public void configure(@NonNull Object pluginConfiguration) throws PluginException {
+    public void configure(@NonNull JSONObject pluginConfiguration, Context context) throws PluginException {
 
     }
 

@@ -15,34 +15,18 @@
 
 package com.amplifyframework.storage.operation;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
 import com.amplifyframework.core.async.AmplifyOperation;
-import com.amplifyframework.core.async.AmplifyOperationRequest;
-import com.amplifyframework.core.async.EventListener;
 import com.amplifyframework.core.category.CategoryType;
 
 /**
- * Desrcibes an operation being carried out to remove an item from storage.
+ * Base operation type for remove behavior on the Storage category.
  */
-public class StorageRemoveOperation extends AmplifyOperation<AmplifyOperationRequest<?>> {
-
+public abstract class StorageRemoveOperation extends AmplifyOperation {
     /**
-     * Constructs a new StorageRemoveOperation.
-     * @param categoryType The category associated to this operation (Storage, duh?)
-     * @param request Bundle of the parameters that were provided the remove API
-     * @param eventListener A listener to be notified of events that occur during the
-     *                      execution of this operation
+     * Constructs a new instance of a StorageRemoveOperation.
      */
-    public StorageRemoveOperation(@NonNull CategoryType categoryType,
-                                  @NonNull AmplifyOperationRequest<?> request,
-                                  @Nullable EventListener<?> eventListener) {
-        super(categoryType, request, eventListener);
-    }
-
-    @Override
-    public void start() {
+    public StorageRemoveOperation() {
+        super(CategoryType.STORAGE);
     }
 }
 

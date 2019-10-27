@@ -15,9 +15,12 @@
 
 package com.amplifyframework.core.plugin;
 
+import android.content.Context;
 import androidx.annotation.NonNull;
 
 import com.amplifyframework.core.category.CategoryTypeable;
+
+import org.json.JSONObject;
 
 /**
  * Interface that defines the contract that every plugin
@@ -34,14 +37,16 @@ public interface Plugin<E> extends CategoryTypeable {
 
     /**
      * Configure the plugin with customized configuration object.
-     * @param pluginConfiguration plugin-specific configuration
+     * @param pluginConfiguration plugin-specific configuration data
+     * @param context An Android Context
      * @throws PluginException when configuration for a plugin was not found
      */
-    void configure(@NonNull Object pluginConfiguration) throws PluginException;
+    void configure(@NonNull JSONObject pluginConfiguration, Context context) throws PluginException;
 
     /**
      * Returns escape hatch for plugin to enable lower-level client use-cases.
      * @return the client used by category plugin
      */
+    @SuppressWarnings("SameReturnValue")
     E getEscapeHatch();
 }

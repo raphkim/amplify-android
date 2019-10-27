@@ -20,8 +20,8 @@ import androidx.annotation.NonNull;
 /**
  * A filter which can be used to control which {@link HubPayload}s a
  * subscribed {@link HubListener} will receive from the Hub. The
- * {@link HubPaylods} utility constants factories for some commonly
- * used types of {@HubPayloadFilter}. Alternately, you are free to
+ * {@link HubFilters} utility constants factories for some commonly used
+ * types of {@link HubPayloadFilter}s. Alternately, you are free to
  * implement your own custom, more complex, logic.
  */
 public interface HubPayloadFilter {
@@ -37,6 +37,6 @@ public interface HubPayloadFilter {
      * @return true if the payload meets your criteria,
      *         false otherwise.
      */
-    boolean filter(@NonNull final HubPayload payload);
+    boolean filter(@NonNull HubPayload payload);
 }
 
