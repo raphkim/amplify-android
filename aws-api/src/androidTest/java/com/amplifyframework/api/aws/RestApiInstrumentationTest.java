@@ -15,37 +15,63 @@
 
 package com.amplifyframework.api.aws;
 
-import com.amplifyframework.AmplifyException;
+import android.util.Log;
+
 import com.amplifyframework.api.rest.RestOptions;
 import com.amplifyframework.api.rest.RestResponse;
 import com.amplifyframework.core.Amplify;
 
+import com.amazonaws.mobile.client.AWSMobileClient;
+import com.amazonaws.mobile.client.Callback;
+import com.amazonaws.mobile.client.UserStateDetails;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.util.concurrent.CountDownLatch;
+
+import static androidx.test.core.app.ApplicationProvider.getApplicationContext;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
  * Validates the functionality of the {@link AWSApiPlugin} for REST operations.
- *
  */
 public final class RestApiInstrumentationTest {
 
     /**
      * Configure the Amplify framework, if that hasn't already happened in this process instance.
-     * @throws AmplifyException Exception is thrown if configuration fails.
+     *
+     * @throws Exception Exception is thrown if configuration fails.
      */
     @BeforeClass
-    public static void onceBeforeTests() throws AmplifyException {
+    public static void onceBeforeTests() throws Exception {
         AmplifyTestConfigurator.configureIfNotConfigured();
+
+        final CountDownLatch latch = new CountDownLatch(1);
+        AWSMobileClient.getInstance().initialize(getApplicationContext(), new Callback<UserStateDetails>() {
+            @Override
+            public void onResult(UserStateDetails userStateDetails) {
+                Log.i("INIT", "onResult: " + userStateDetails.getUserState());
+                latch.countDown();
+            }
+
+            @Override
+            @SuppressWarnings("ParameterName")
+            public void onError(Exception e) {
+                Log.e("INIT", "Initialization error.", e);
+                latch.countDown();
+            }
+        });
+        latch.await();
     }
 
     /**
      * Test whether we can make api Rest call in none auth.
+     *
      * @throws JSONException Exception is thrown if JSON parsing fails.
      */
     @Test
@@ -71,6 +97,7 @@ public final class RestApiInstrumentationTest {
 
     /**
      * Test whether we can make POST api Rest call in none auth.
+     *
      * @throws JSONException Exception is thrown if JSON parsing fails.
      */
     @Test
@@ -96,6 +123,7 @@ public final class RestApiInstrumentationTest {
 
     /**
      * Test whether we can make api Rest call in api key as auth type.
+     *
      * @throws JSONException Exception is thrown if JSON parsing fails.
      */
     @Test
@@ -117,5 +145,30 @@ public final class RestApiInstrumentationTest {
                 "Should return the right value",
                 "/simplesuccessapikey",
                 contextJSON.getString("resource-path"));
+    }
+
+    /**
+     * Test whether we can make api Rest call in IAM as auth type.
+     */
+    @Test
+    public void getRequestWithIAM() {
+        final RestOptions options = RestOptions.builder().addPath("items").build();
+        LatchedRestResponseListener responseListener = new LatchedRestResponseListener();
+        Amplify.API.get("iamAPI", options, responseListener);
+        RestResponse response = responseListener.awaitTerminalEvent().awaitSuccessResponse();
+        assertTrue("Should return a non null data", response.getData() != null);
+    }
+
+    /**
+     * Test whether we can get failed response for access denied.
+     */
+    @Test
+    public void getRequestWithIAMFailedAccess() {
+        final RestOptions options = RestOptions.builder().addPath("invalidPath").build();
+        LatchedRestResponseListener responseListener = new LatchedRestResponseListener();
+        Amplify.API.get("iamAPI", options, responseListener);
+        RestResponse response = responseListener.awaitTerminalEvent().awaitErrors();
+        assertTrue("Should return a non null data", response.getData() != null);
+        assertFalse("Response should be unsuccessful", response.getCode().isSucessful());
     }
 }
